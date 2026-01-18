@@ -25,3 +25,6 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Chat history
+.chat-history.md
