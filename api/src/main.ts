@@ -13,10 +13,10 @@ function main() {
   initLogger(env.LOG_LEVEL);
   const logger = getLogger();
 
-  // Initialize database with optional query logging (only in development)
+  // Initialize database with optional query logging (only in development or QA)
   const db = createDatabase(
     env.DATABASE_URL,
-    env.LOG_LEVEL === "debug" ? { logger: createDatabaseLogger() } : undefined
+    env.ENVIRONMENT !== "production" ? { logger: createDatabaseLogger() } : undefined
   );
 
   const healthRoute = createHealthRoute(createHealthRepository(db));
