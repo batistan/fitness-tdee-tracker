@@ -1,13 +1,24 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle, type NeonHttpDatabase } from "drizzle-orm/neon-http";
+import type { Logger as DrizzleLogger } from "drizzle-orm";
 import * as schema from "./schema.ts";
 import { getEnv } from "../config/env.ts";
 
 export type Database = NeonHttpDatabase<typeof schema>;
 
-export function createDatabase(connectionString: string): Database {
+interface CreateDatabaseOptions {
+  logger?: DrizzleLogger;
+}
+
+export function createDatabase(
+  connectionString: string,
+  options?: CreateDatabaseOptions
+): Database {
   const sql = neon(connectionString);
-  return drizzle(sql, { schema });
+  return drizzle(sql, {
+    schema,
+    logger: options?.logger,
+  });
 }
 
 let _db: Database | null = null;

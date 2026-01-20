@@ -1,10 +1,12 @@
 type Environment = "development" | "qa" | "production";
+type LogLevel = "debug" | "info" | "warn" | "error";
 
 interface EnvConfig {
   ENVIRONMENT: Environment;
   PORT: number;
   CORS_ORIGIN: string;
   LOG_PAYLOADS: boolean;
+  LOG_LEVEL: LogLevel;
   DATABASE_URL: string;
 }
 
@@ -13,16 +15,19 @@ const configs: Record<Environment, Omit<EnvConfig, "ENVIRONMENT" | "DATABASE_URL
     PORT: 8000,
     CORS_ORIGIN: "http://localhost:3000",
     LOG_PAYLOADS: true,
+    LOG_LEVEL: "debug",
   },
   qa: {
     PORT: 8000,
     CORS_ORIGIN: "https://calometri-web-qa.deno.dev",
     LOG_PAYLOADS: true,
+    LOG_LEVEL: "info",
   },
   production: {
     PORT: 8000,
     CORS_ORIGIN: "https://calometri-web.deno.dev",
     LOG_PAYLOADS: false,
+    LOG_LEVEL: "warn",
   },
 };
 
@@ -46,3 +51,5 @@ export function getEnv(): EnvConfig {
     CORS_ORIGIN: Deno.env.get("CORS_ORIGIN") || configs[envName].CORS_ORIGIN,
   };
 }
+
+export type { Environment, EnvConfig, LogLevel };
