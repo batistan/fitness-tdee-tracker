@@ -8,7 +8,7 @@ export class DatabaseLogger implements DrizzleLogger {
   logQuery(query: string, params: unknown[]): void {
     const logger = getLogger();
 
-    logger.debug("Database query", {
+    logger.info("Database query", {
       query,
       params,
     });
