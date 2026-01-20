@@ -5,9 +5,6 @@ interface RequestLogOptions {
   logPayloads: boolean;
 }
 
-/**
- * Middleware for logging HTTP requests and responses with performance metrics
- */
 export function requestLogger(options: RequestLogOptions) {
   return async (c: Context, next: Next) => {
     const logger = getLogger();
@@ -25,11 +22,9 @@ export function requestLogger(options: RequestLogOptions) {
       headers: Object.fromEntries(c.req.header()),
     };
 
-    // Optionally log request payload
-    if (options.logPayloads && (method === "POST" || method === "PUT" || method === "PATCH")) {
+    if (options.logPayloads) {
       try {
         const body = await c.req.text();
-        // Parse and re-set the request body for downstream handlers
         if (body) {
           requestLog.payload = JSON.parse(body);
           // Re-create request with body for downstream middleware
@@ -40,22 +35,18 @@ export function requestLogger(options: RequestLogOptions) {
           }) as typeof c.req;
         }
       } catch (_error) {
-        // If body parsing fails, continue without logging payload
         requestLog.payloadError = "Failed to parse request body";
       }
     }
 
     logger.info("Incoming request", requestLog);
 
-    // Store requestId in context for use in error handlers
     c.set("requestId", requestId);
 
-    // Process request
     await next();
 
-    // Log response
     const endTime = performance.now();
-    const duration = Math.round((endTime - startTime) * 100) / 100; // Round to 2 decimals
+    const duration = Math.round((endTime - startTime) * 100) / 100;
 
     const responseLog: Record<string, unknown> = {
       requestId,
@@ -65,7 +56,6 @@ export function requestLogger(options: RequestLogOptions) {
       durationMs: duration,
     };
 
-    // Optionally log response payload
     if (options.logPayloads) {
       try {
         const responseClone = c.res.clone();
@@ -73,9 +63,7 @@ export function requestLogger(options: RequestLogOptions) {
         if (body) {
           responseLog.payload = JSON.parse(body);
         }
-      } catch (_error) {
-        // If body parsing fails, continue without logging payload
-      }
+      } catch (_error) {}
     }
 
     const logLevel = c.res.status >= 500 ? "error" : c.res.status >= 400 ? "warn" : "info";
@@ -83,9 +71,7 @@ export function requestLogger(options: RequestLogOptions) {
   };
 }
 
-/**
- * Middleware for catching and logging errors
- */
+
 export function errorHandler() {
   return async (c: Context, next: Next) => {
     const logger = getLogger();
@@ -107,7 +93,6 @@ export function errorHandler() {
 
       logger.error("Unhandled error", errorLog);
 
-      // Return error response
       return c.json(
         {
           error: {
