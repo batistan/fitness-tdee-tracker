@@ -35,6 +35,7 @@ Deno.test("environment config", async (t) => {
   await t.step("returns development config by default", async () => {
     resetEnv();
     Deno.env.set("DATABASE_URL", "postgresql://test");
+    Deno.env.set("JWT_SECRET", "test-secret");
     Deno.env.delete("ENVIRONMENT");
     const getEnv = await importFreshEnv();
 
@@ -49,6 +50,7 @@ Deno.test("environment config", async (t) => {
   await t.step("returns qa config when ENVIRONMENT=qa", async () => {
     resetEnv();
     Deno.env.set("DATABASE_URL", "postgresql://test");
+    Deno.env.set("JWT_SECRET", "test-secret");
     Deno.env.set("ENVIRONMENT", "qa");
     const getEnv = await importFreshEnv();
 
@@ -62,6 +64,7 @@ Deno.test("environment config", async (t) => {
   await t.step("returns production config when ENVIRONMENT=production", async () => {
     resetEnv();
     Deno.env.set("DATABASE_URL", "postgresql://test");
+    Deno.env.set("JWT_SECRET", "test-secret");
     Deno.env.set("ENVIRONMENT", "production");
     const getEnv = await importFreshEnv();
 
@@ -75,6 +78,7 @@ Deno.test("environment config", async (t) => {
   await t.step("allows PORT override via environment variable", async () => {
     resetEnv();
     Deno.env.set("DATABASE_URL", "postgresql://test");
+    Deno.env.set("JWT_SECRET", "test-secret");
     Deno.env.set("PORT", "9000");
     const getEnv = await importFreshEnv();
 
@@ -86,6 +90,7 @@ Deno.test("environment config", async (t) => {
   await t.step("allows CORS_ORIGIN override via environment variable", async () => {
     resetEnv();
     Deno.env.set("DATABASE_URL", "postgresql://test");
+    Deno.env.set("JWT_SECRET", "test-secret");
     Deno.env.set("CORS_ORIGIN", "https://custom-origin.com");
     const getEnv = await importFreshEnv();
 
@@ -97,6 +102,7 @@ Deno.test("environment config", async (t) => {
   await t.step("includes DATABASE_URL from environment", async () => {
     resetEnv();
     Deno.env.set("DATABASE_URL", "postgresql://user:pass@host/db");
+    Deno.env.set("JWT_SECRET", "test-secret");
     const getEnv = await importFreshEnv();
 
     const env = getEnv();
@@ -104,9 +110,23 @@ Deno.test("environment config", async (t) => {
     assertEquals(env.DATABASE_URL, "postgresql://user:pass@host/db");
   });
 
+  await t.step("throws when JWT_SECRET is missing", async () => {
+    resetEnv();
+    Deno.env.set("DATABASE_URL", "postgresql://test");
+    Deno.env.delete("JWT_SECRET");
+    const getEnv = await importFreshEnv();
+
+    assertThrows(
+      () => getEnv(),
+      Error,
+      "JWT_SECRET environment variable is required"
+    );
+  });
+
   await t.step("throws on unknown environment", async () => {
     resetEnv();
     Deno.env.set("DATABASE_URL", "postgresql://test");
+    Deno.env.set("JWT_SECRET", "test-secret");
     Deno.env.set("ENVIRONMENT", "invalid");
     const getEnv = await importFreshEnv();
 

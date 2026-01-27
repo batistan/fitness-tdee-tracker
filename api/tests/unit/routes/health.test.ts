@@ -6,6 +6,7 @@ const originalEnv = { ...Deno.env.toObject() };
 
 function setupTestEnv() {
   Deno.env.set("DATABASE_URL", "postgresql://test");
+  Deno.env.set("JWT_SECRET", "test-secret");
 }
 
 function resetEnv() {
