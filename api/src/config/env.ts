@@ -8,6 +8,7 @@ interface EnvConfig {
   LOG_PAYLOADS: boolean;
   LOG_LEVEL: LogLevel;
   DATABASE_URL: string;
+  JWT_SECRET: string;
 }
 
 const configs: Record<Environment, Omit<EnvConfig, "ENVIRONMENT" | "DATABASE_URL">> = {
@@ -43,9 +44,15 @@ export function getEnv(): EnvConfig {
     throw new Error("DATABASE_URL environment variable is required");
   }
 
+  const jwtSecret = Deno.env.get("JWT_SECRET");
+  if (!jwtSecret) {
+    throw new Error("JWT_SECRET environment variable is required");
+  }
+
   return {
     ENVIRONMENT: envName,
     DATABASE_URL: databaseUrl,
+    JWT_SECRET: jwtSecret,
     ...configs[envName],
     PORT: Number(Deno.env.get("PORT")) || configs[envName].PORT,
     CORS_ORIGIN: Deno.env.get("CORS_ORIGIN") || configs[envName].CORS_ORIGIN,
